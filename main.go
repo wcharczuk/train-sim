@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"./simulation"
+	"github.com/wcharczuk/train-sim/simulation"
 )
 
 func delay(d time.Duration) *time.Duration {

@@ -11,6 +11,7 @@ func createTestSimulation() *Simulation {
 	sim := New(1*time.Second, 1*time.Hour, nil)
 	sim.TotalPassengerCount = 128
 	sim.TotalTrainCount = 32
+	sim.Stasis = true
 	sim.GeneratePassengers()
 	sim.GenerateStations()
 	sim.GenerateTrains()
@@ -117,13 +118,13 @@ func TestSimulationShouldReleaseTrainFromYardBelowAverageTime(t *testing.T) {
 	assert.False(sim.ShouldReleaseTrainFromYard())
 }
 
-func TestSimulationShouldReleaseTrainFromYardDraining(t *testing.T) {
+func TestSimulationShouldReleaseTrainFromYardComplete(t *testing.T) {
 	assert := assert.New(t)
 	sim := createTestSimulation()
 	sim.AverageTimeBetweenTrains = 1 * time.Minute
 	sim.LastTrainReleased = 1 * time.Minute
 	sim.WallClock = 2 * time.Hour
-	sim.ShouldDrain = true
+	sim.Complete = true
 
 	assert.False(sim.ShouldReleaseTrainFromYard())
 }
@@ -206,10 +207,11 @@ func TestSimulationStationIncident(t *testing.T) {
 	assert.Equal(SignalHold, train.Signal)
 }
 
-func TestSimulationStationIncidentDraining(t *testing.T) {
+func TestSimulationStationIncidentComplete(t *testing.T) {
 	assert := assert.New(t)
 	sim := createTestSimulation()
-	sim.ShouldDrain = true
+	sim.Stasis = true
+	sim.Complete = true
 	sim.StationIncidentLikelihood = float64(1 << 20) //this should cause a problem.
 	timeSquare := sim.Stations[8]
 	train := sim.Yard.Dequeue()
@@ -271,7 +273,6 @@ func TestSimulationReleaseTrainsOnHoldBeforeAverageDelay(t *testing.T) {
 
 func TestSimulationPassengerArrivesAtStation(t *testing.T) {
 	assert := assert.New(t)
-
 	sim := createTestSimulation()
 	p := sim.People.Dequeue()
 	station := sim.Stations[8]

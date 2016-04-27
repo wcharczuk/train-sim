@@ -2,7 +2,6 @@ package simulation
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"time"
 
@@ -302,20 +301,10 @@ func (s *Simulation) PassengersArrive(station *Station) {
 		return
 	}
 
-	expectedPassengers := station.ExpectedPassengersInQuantum(s.Provider, s.StepLength)
-	if expectedPassengers > 1.0 {
-		for x := 0; x < int(math.Floor(expectedPassengers)); x++ {
-			if s.People.Len() == 0 {
-				break
-			}
-			passenger := s.People.Dequeue()
-			s.PassengerArrivesAtStation(station, passenger)
-		}
-	} else {
-		if s.Provider.Float64() < expectedPassengers {
-			passenger := s.People.Dequeue()
-			s.PassengerArrivesAtStation(station, passenger)
-		}
+	pdf := station.PassengerArrivalPDF(s.Provider, s.StepLength)
+	if s.Provider.Float64() <= pdf {
+		passenger := s.People.Dequeue()
+		s.PassengerArrivesAtStation(station, passenger)
 	}
 }
 

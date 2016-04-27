@@ -13,7 +13,7 @@ func NewStation(name string, averageRidership int, generalPopulation *QueueOfPas
 		WaitingPassengers:  NewQueueOfPassenger(),
 		GeneralPopulation:  generalPopulation,
 		RidersPerDayMean:   averageRidership,
-		RidersPerDayStdDev: math.Sqrt(float64(averageRidership) * 0.5), //totally bogus
+		RidersPerDayStdDev: math.Sqrt(float64(averageRidership) * 0.75), //totally bogus, 50% variance
 	}
 }
 
@@ -105,10 +105,13 @@ func (s *Station) TrainDeparts(train *Train) {
 	}
 }
 
-func (s *Station) ExpectedPassengersInQuantum(provider *rand.Rand, stepLength time.Duration) float64 {
+func (s *Station) PassengerArrivalPDF(provider *rand.Rand, stepLength time.Duration) float64 {
 	q := float64(time.Hour/stepLength) * 24.0
+
 	u := float64(s.RidersPerDayMean) / q
 	o := float64(s.RidersPerDayStdDev) / q
 
-	return (provider.NormFloat64() * o) + u
+	g := NewGaussian(u, o*o)
+
+	return g.Cdf(1.0)
 }

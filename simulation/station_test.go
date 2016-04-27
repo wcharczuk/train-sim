@@ -7,16 +7,14 @@ import (
 	"github.com/blendlabs/go-assert"
 )
 
-func TestStationExpectedPassengersInQuantum(t *testing.T) {
+func TestStationPassengerArrivalPDF(t *testing.T) {
 	assert := assert.New(t)
 	sim := createTestSimulation()
 	sim.CalculateTotalAverageRidership()
 
 	station := sim.Stations[8] //times square
 
-	perHour := station.ExpectedPassengersInQuantum(sim.Provider, 1*time.Hour)
-	perSecond := station.ExpectedPassengersInQuantum(sim.Provider, 1*time.Second)
-	assert.True(perHour > 0)
-	assert.True(perSecond > 0)
-	assert.True(perHour > perSecond)
+	pdf := station.PassengerArrivalPDF(sim.Provider, 1*time.Second)
+	assert.True(pdf > 0, pdf)
+	assert.True(pdf <= 1.0, pdf)
 }
